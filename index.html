@@ -8,24 +8,24 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400;1,500;0,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="p-4 md:p-8">
 
     <div class="max-w-4xl mx-auto">
-        <h1 class="main-title text-3xl md:text-4xl font-bold text-center mb-8">Keluarga Zaidar Taib dan Ahmad Sofyan</h1>
+        <h1 class="main-title text-3xl md:text-4xl font-bold text-center mb-8">Hello family 👋</h1>
         
         <!-- Search bar -->
         <div class="mb-6">
-            <input type="text" id="searchInput" placeholder="Cari nama anggota keluarga..." class="search-input w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 text-base" oninput="filterFamilyTree()">
+            <input type="text" id="searchInput" placeholder="Cari nama anggota keluarga..." class="search-input w-full px-4 py-2 border border-gray-200 focus:outline-none focus:border-blue-500 text-base" oninput="filterFamilyTree()">
         </div>
 
         <!-- Kontainer untuk silsilah keluarga -->
         <div id="family-tree-container">
             <!-- Loading indicator saat data sedang diambil -->
-            <div id="loading" class="text-center text-lg">
+            <div id="loading" class="text-center text-lg loading-text">
                 Memuat data...
             </div>
         </div>
