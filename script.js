@@ -1,5 +1,5 @@
 // URL Google Sheet dalam format CSV
-const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSCrAyIWhxxVfIn9_jcP0hYGwyBDomkJo6vwxKrW3vp2_H1pJ5qev6jZ-0_5BQAO0IS03GHfc7RL14l/pub?gid=58345307&single=true&output=csv';
+const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRzh-QghHQOBSVi1bR7Bm_DXECJ3qaOctaxQOgwINm5G7EQNP6pgTydjwv8JdNurOaKJGoi4G2gXKOC/pub?output=csv';
 let fullFamilyData = {}; // Variabel global untuk menyimpan data lengkap
 
 /**
@@ -117,12 +117,22 @@ function renderFamilyStructure(data) {
             const cleanChildName = child.replace(/^\d+\.\s*/, '').trim();
             const statusAnak = childData.statusAnak || '';
 
-            // Gabungkan nama menantu dengan status
             const menantuList = childData.menantu.map(m => {
                 const menantuNameHighlighted = highlightText(m.name, searchTerm);
                 const statusMenantuHighlighted = m.status ? `<span class="text-xs text-gray-500">(${highlightText(m.status, searchTerm)})</span>` : '';
                 return `${menantuNameHighlighted} ${statusMenantuHighlighted}`.trim();
             }).filter(m => m !== '').join(', ');
+
+            const hasGrandchildren = childData.grandchildren.length > 0;
+            let isExpanded = false;
+            
+            // Otomatis expand jika cucu cocok dengan kata kunci pencarian
+            if (searchTerm && hasGrandchildren) {
+                const matchingGrandchildren = childData.grandchildren.children.filter(gc => gc.toLowerCase().includes(searchTerm));
+                if (matchingGrandchildren.length > 0) {
+                    isExpanded = true;
+                }
+            }
 
             const childItem = document.createElement('div');
             childItem.className = 'family-item family-item-child';
@@ -132,17 +142,30 @@ function renderFamilyStructure(data) {
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                     </svg>
                 </div>
-                <div>
-                    <p class="family-name">
-                        ${highlightText(cleanChildName, searchTerm)} ${statusAnak ? `<span class="text-xs text-gray-500">(${highlightText(statusAnak, searchTerm)})</span>` : ''}
-                    </p>
-                    ${menantuList ? `<p class="subtitle">Pasangan: ${menantuList}</p>` : ''}
+                <div class="child-info">
+                    <div>
+                        <p class="family-name">
+                            ${highlightText(cleanChildName, searchTerm)} ${statusAnak ? `<span class="text-xs text-gray-500">(${highlightText(statusAnak, searchTerm)})</span>` : ''}
+                        </p>
+                        ${menantuList ? `<p class="subtitle">Pasangan: ${menantuList}</p>` : ''}
+                    </div>
+                    ${hasGrandchildren ? `
+                        <div class="toggle-text flex items-center" onclick="event.stopPropagation(); toggleGrandchildren(this);">
+                            <span>Jumlah Cucu: ${childData.grandchildren.length}</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="chevron-icon w-4 h-4 ml-2 ${isExpanded ? 'rotated' : ''}">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                            </svg>
+                        </div>
+                    ` : ''}
                 </div>
             `;
             container.appendChild(childItem);
 
-            const grandchildren = childData.grandchildren;
-            if (grandchildren.length > 0) {
+            if (hasGrandchildren) {
+                const grandchildWrapper = document.createElement('div');
+                grandchildWrapper.className = `grandchild-wrapper ${isExpanded ? 'expanded' : ''}`;
+                
+                const grandchildren = childData.grandchildren;
                 grandchildren.forEach((grandchild, index) => {
                     const grandchildItem = document.createElement('div');
                     grandchildItem.className = 'family-item family-item-grandchild';
@@ -161,11 +184,21 @@ function renderFamilyStructure(data) {
                             <p class="subtitle">${subtitleText}</p>
                         </div>
                     `;
-                    container.appendChild(grandchildItem);
+                    grandchildWrapper.appendChild(grandchildItem);
                 });
+                container.appendChild(grandchildWrapper);
             }
         });
     }
+}
+
+// Fungsi untuk mengaktifkan accordion
+function toggleGrandchildren(element) {
+    const childItem = element.closest('.family-item-child');
+    const wrapper = childItem.nextElementSibling;
+    const chevron = element.querySelector('.chevron-icon');
+    wrapper.classList.toggle('expanded');
+    chevron.classList.toggle('rotated');
 }
 
 /**
@@ -228,7 +261,7 @@ function parseCsvData(csvText) {
             }
         }
 
-        for (let j = Math.max(statusMenantu1ColIndex, statusMenantu2ColIndex, coupleColIndex, childColIndex, statusAnakColIndex) + 1; j < columns.length; j++) {
+        for (let j = Math.max(menantu1ColIndex, statusMenantu2ColIndex, coupleColIndex, childColIndex, statusAnakColIndex) + 1; j < columns.length; j++) {
             const grandchild = columns[j].trim();
             if (grandchild && currentChild) {
                 familyData[currentCouple][currentChild].grandchildren.push(grandchild);
