@@ -1,31 +1,34 @@
 body {
     background-color: #FAFAFA;
     font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
 }
 
 .couple-group-header {
     color: #393939;
-    font-size: 1.5rem;
-    font-weight: 600;
+    font-size: 1rem;
+    font-weight: 500;
     margin-top: 1.5rem;
     margin-bottom: 0.5rem;
     padding-bottom: 0.5rem;
 }
 
 .family-item {
-    background-color: #FFFFFF;
-    border: 1px solid #E5E5E5;
-    border-radius: 0.5rem;
+    background: #FFF;
+    border-radius: 8px;
+    border: 0.5px solid #ECECEC;
+    box-shadow: 0 4px 15px -4px rgba(0, 0, 0, 0.04);
     padding: 1rem;
     margin-bottom: 0.5rem;
     display: flex;
     align-items: center;
 }
-
+        
 .family-item-child {
     margin-left: 0rem;
     margin-top: 0.5rem;
     padding: 0.75rem 1rem;
+    cursor: pointer;
 }
 
 .family-item-grandchild {
@@ -34,15 +37,16 @@ body {
     padding: 0.75rem 1rem;
 }
 
-.search-container {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
 .search-input {
     font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
     color: #5D5D5D;
+    border-radius: 8px;
+    border: 0.5px solid #ECECEC;
+    background: #FFF;
+    box-shadow: 0 4px 15px -4px rgba(0, 0, 0, 0.04);
+    height: 52px;
+    padding: 0 1rem;
 }
 
 .search-input::placeholder {
@@ -84,7 +88,8 @@ body {
     height: 24px;
     color: #FFFFFF;
 }
-
+        
+/* Gaya untuk teks yang di-highlight */
 .highlight {
     background-color: #fef08a;
     padding: 2px;
@@ -113,4 +118,43 @@ body {
 
 .not-found-icon {
     color: #D1D1D1;
+}
+        
+/* Gaya untuk accordion */
+.grandchild-wrapper {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+}
+
+.grandchild-wrapper.expanded {
+    max-height: 1000px;
+    transition: max-height 0.5s ease-in;
+}
+
+.chevron-icon {
+    margin-left: 0.5rem;
+    transition: transform 0.3s ease-out;
+    color: #8C8C8C;
+}
+        
+.chevron-icon.rotated {
+    transform: rotate(180deg);
+}
+        
+/* Awalnya, arah panah ke bawah */
+.child-info[aria-expanded="false"] .chevron-icon {
+    transform: rotate(0deg);
+}
+        
+/* Ketika diperluas, arah panah ke atas */
+.child-info[aria-expanded="true"] .chevron-icon {
+    transform: rotate(180deg);
+}
+
+.child-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
 }
