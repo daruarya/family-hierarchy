@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Silsilah Keluarga</title>
+    <!-- Tailwind CSS CDN untuk styling yang cepat dan responsif -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400;1,500;0,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto">
+        <h1 class="main-title text-3xl md:text-4xl font-bold text-center mb-8">Keluarga Zaidar Taib dan Ahmad Sofyan</h1>
+        
+        <!-- Search bar -->
+        <div class="mb-6">
+            <input type="text" id="searchInput" placeholder="Cari nama anggota keluarga..." class="search-input w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 text-base" oninput="filterFamilyTree()">
+        </div>
+
+        <!-- Kontainer untuk silsilah keluarga -->
+        <div id="family-tree-container">
+            <!-- Loading indicator saat data sedang diambil -->
+            <div id="loading" class="text-center text-lg">
+                Memuat data...
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
