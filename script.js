@@ -122,13 +122,12 @@ function renderFamilyStructure(data) {
                 const statusMenantuHighlighted = m.status ? `<span class="text-xs text-gray-500">(${highlightText(m.status, searchTerm)})</span>` : '';
                 return `${menantuNameHighlighted} ${statusMenantuHighlighted}`.trim();
             }).filter(m => m !== '').join(', ');
-
+            
             const hasGrandchildren = childData.grandchildren.length > 0;
             let isExpanded = false;
             
-            // Otomatis expand jika cucu cocok dengan kata kunci pencarian
             if (searchTerm && hasGrandchildren) {
-                const matchingGrandchildren = childData.grandchildren.children.filter(gc => gc.toLowerCase().includes(searchTerm));
+                const matchingGrandchildren = childData.grandchildren.filter(gc => gc.toLowerCase().includes(searchTerm));
                 if (matchingGrandchildren.length > 0) {
                     isExpanded = true;
                 }
@@ -136,28 +135,35 @@ function renderFamilyStructure(data) {
 
             const childItem = document.createElement('div');
             childItem.className = 'family-item family-item-child';
+            childItem.onclick = function() {
+                if (hasGrandchildren) {
+                    const wrapper = this.nextElementSibling;
+                    wrapper.classList.toggle('expanded');
+                    
+                    const chevron = this.querySelector('.chevron-icon');
+                    chevron.classList.toggle('rotated');
+                    this.setAttribute('aria-expanded', wrapper.classList.contains('expanded'));
+                }
+            };
+            childItem.setAttribute('aria-expanded', isExpanded); // Atur state awal
+            
             childItem.innerHTML = `
-                <div class="profile-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                    </svg>
-                </div>
-                <div class="child-info">
-                    <div>
+                <div class="flex items-center">
+                    <div class="flex-grow">
                         <p class="family-name">
                             ${highlightText(cleanChildName, searchTerm)} ${statusAnak ? `<span class="text-xs text-gray-500">(${highlightText(statusAnak, searchTerm)})</span>` : ''}
                         </p>
                         ${menantuList ? `<p class="subtitle">Pasangan: ${menantuList}</p>` : ''}
                     </div>
-                    ${hasGrandchildren ? `
-                        <div class="toggle-text flex items-center" onclick="event.stopPropagation(); toggleGrandchildren(this);">
-                            <span>Jumlah Cucu: ${childData.grandchildren.length}</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="chevron-icon w-4 h-4 ml-2 ${isExpanded ? 'rotated' : ''}">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                            </svg>
-                        </div>
-                    ` : ''}
                 </div>
+                ${hasGrandchildren ? `
+                    <div class="toggle-text flex items-center ml-auto">
+                        <span class="mr-1">Jumlah Cucu: ${childData.grandchildren.length}</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="chevron-icon w-4 h-4 ml-2 ${isExpanded ? 'rotated' : ''}">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </div>
+                ` : ''}
             `;
             container.appendChild(childItem);
 
@@ -174,11 +180,6 @@ function renderFamilyStructure(data) {
                     const cleanGrandchildName = grandchild.replace('*', '').trim();
 
                     grandchildItem.innerHTML = `
-                        <div class="profile-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                            </svg>
-                        </div>
                         <div>
                             <p class="family-name grandchild-name">${highlightText(cleanGrandchildName, searchTerm)}</p>
                             <p class="subtitle">${subtitleText}</p>
@@ -190,15 +191,6 @@ function renderFamilyStructure(data) {
             }
         });
     }
-}
-
-// Fungsi untuk mengaktifkan accordion
-function toggleGrandchildren(element) {
-    const childItem = element.closest('.family-item-child');
-    const wrapper = childItem.nextElementSibling;
-    const chevron = element.querySelector('.chevron-icon');
-    wrapper.classList.toggle('expanded');
-    chevron.classList.toggle('rotated');
 }
 
 /**
