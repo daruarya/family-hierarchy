@@ -28,7 +28,6 @@ body {
     margin-left: 0rem;
     margin-top: 0.5rem;
     padding: 0.75rem 1rem;
-    cursor: pointer;
 }
 
 .family-item-grandchild {
@@ -157,4 +156,10 @@ body {
     align-items: center;
     justify-content: space-between;
     width: 100%;
+}
+
+.loading-text {
+    color: #393939;
+    font-size: 1rem;
+    font-weight: 500;
 }
