@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Silsilah Keluarga</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+        .node rect {
+            stroke-width: 0.5px; /* Ketebalan garis kartu diubah */
+            transition: filter 0.3s ease-in-out; /* Transisi untuk efek shadow */
+        }
+        .node .name {
+            font-weight: 600;
+            font-size: 14px;
+            fill: #111827; /* gray-900 */
+        }
+        .node .details {
+            font-size: 12px;
+            fill: #4b5563; /* gray-600 */
+        }
+        .link {
+            fill: none;
+            stroke-width: 2.5px;
+            transition: stroke 0.3s;
+        }
+        .tooltip {
+            position: absolute;
+            text-align: left;
+            padding: 8px;
+            font-size: 12px;
+            background: #ffffff;
+            color: #1f2937;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        /* Style untuk tspan yang disorot, sekarang hanya untuk menebalkan teks */
+        .highlight {
+            font-weight: 700;
+        }
+        /* *** BARU: Style untuk tombol filter aktif *** */
+        #filterButton.active {
+            background-color: #f3f4f6; /* gray-100 */
+            box-shadow: inset 2px 2px 4px #d1d9e6, inset -2px -2px 4px #ffffff;
+        }
+    </style>
+</head>
+<body class="bg-white text-gray-800">
+
+    <!-- TOP BAR -->
+    <header class="fixed top-0 left-0 right-0 z-20 bg-white/80 backdrop-blur-sm border-b border-gray-200 shadow-sm">
+        <div class="mx-auto px-6 py-3 flex justify-between items-center">
+            <!-- Judul di Kiri -->
+            <div>
+                <h1 class="text-xl font-bold text-gray-900">Hallo 👋</h1>
+            </div>
+            <!-- Kontrol di Kanan -->
+            <div class="flex items-center space-x-2">
+                <!-- *** FILTER *** -->
+                <div class="relative">
+                    <button id="filterButton" class="bg-white hover:bg-gray-100 border rounded-lg w-10 h-10 text-gray-500 shadow-sm flex items-center justify-center transition-all" style="border-color: #E7E7E7; border-width: 0.5px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.572a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z" />
+                        </svg>
+                    </button>
+                    <div id="filterDropdown" class="absolute right-0 mt-2 w-56 bg-white border border-gray-300 rounded-lg shadow-lg z-30 hidden p-2 space-y-1">
+                        <!-- Opsi filter akan diisi oleh JavaScript -->
+                    </div>
+                </div>
+                <!-- Pencarian -->
+                <div class="relative">
+                    <input type="text" id="searchInput" placeholder="Search Name..." class="w-full h-10 bg-white text-gray-900 border rounded-lg pl-3 pr-10 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none shadow-sm" style="border-color: #E7E7E7; border-width: 0.5px;">
+                    <button id="searchButton" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
+                            <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                    <div id="suggestions" class="absolute mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg z-30 hidden"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div id="tree-container" class="w-full h-screen">
+        <svg id="family-tree-svg" class="w-full h-full">
+            <defs>
+                <filter id="raised-shadow" x="-50%" y="-50%" width="200%" height="200%">
+                    <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.07"/>
+                </filter>
+                <filter id="strong-raised-shadow" x="-50%" y="-50%" width="200%" height="200%">
+                    <feDropShadow dx="0" dy="12" stdDeviation="18" flood-color="#000000" flood-opacity="0.18"/>
+                </filter>
+            </defs>
+        </svg>
+    </div>
+    <div id="tooltip" class="tooltip"></div>
+
+    <script>
+        const dataUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQcOhtn_2yoKKG6OHSreh1_GmMV7q5xEsQ8QLmVAf6jfnaqocEhXoZJlyZSqx0Roqd_ENh2R_D6rjsy/pub?gid=569149504&single=true&output=csv';
+
+        const svg = d3.select("#family-tree-svg");
+        const container = d3.select("#tree-container");
+        const svgWidth = container.node().getBoundingClientRect().width;
+        const svgHeight = container.node().getBoundingClientRect().height;
+
+        const g = svg.append("g");
+        const tooltip = d3.select("#tooltip");
+
+        const zoom = d3.zoom()
+            .scaleExtent([0.1, 3])
+            .on("zoom", (event) => g.attr("transform", event.transform));
+        svg.call(zoom);
+
+        const minNodeWidth = 180;
+        const nodeHeight = 75;
+        
+        let lastHighlight = null;
+        let originalData = [];
+        let currentNodes, currentNodesData, currentDetailsMap, currentAllNames;
+
+        // Fungsi utama untuk menggambar pohon
+        function renderTree(dataToRender, initialTargetName = null) {
+            g.selectAll("*").remove();
+
+            const flatData = [];
+            const addedPeople = new Set();
+            const detailsMap = new Map();
+            const branchAncestorMap = new Map();
+            const colorScale = d3.scaleOrdinal(d3.schemeSet2);
+            const allNamesSet = new Set(); 
+
+            const addPerson = (name, parentName, branchAncestor) => {
+                if (name && !addedPeople.has(name)) {
+                    flatData.push({ id: name, parentId: parentName });
+                    addedPeople.add(name);
+                    branchAncestorMap.set(name, branchAncestor);
+                }
+            };
+
+            const addPartner = (person, partner, status) => {
+                if (person && partner) {
+                    const partnerObj = { name: partner, status: status };
+                    const personObj = { name: person, status: null };
+
+                    const personDetails = detailsMap.get(person) || {};
+                    if (!personDetails.pasangan) personDetails.pasangan = [];
+                    if (!personDetails.pasangan.find(p => p.name === partner)) {
+                        personDetails.pasangan.push(partnerObj);
+                    }
+                    detailsMap.set(person, personDetails);
+
+                    const partnerDetails = detailsMap.get(partner) || {};
+                     if (!partnerDetails.pasangan) partnerDetails.pasangan = [];
+                    if (!partnerDetails.pasangan.find(p => p.name === person)) {
+                        partnerDetails.pasangan.push(personObj);
+                    }
+                    detailsMap.set(partner, partnerDetails);
+                }
+            };
+
+            let currentMoyang = '';
+            let currentBuyut = '';
+            let currentKeturunanPertama = '';
+            let currentKeturunanKedua = '';
+            let currentAnak = '';
+
+            dataToRender.forEach(row => {
+                const cleanedRow = row;
+
+                Object.values(cleanedRow).forEach(name => {
+                    if (name) allNamesSet.add(name);
+                });
+
+                if (cleanedRow['Moyang']) currentMoyang = cleanedRow['Moyang'];
+                if (cleanedRow['Buyut']) currentBuyut = cleanedRow['Buyut'];
+                if (cleanedRow['Keturunan Pertama']) currentKeturunanPertama = cleanedRow['Keturunan Pertama'];
+                if (cleanedRow['Keturunan Kedua']) currentKeturunanKedua = cleanedRow['Keturunan Kedua'];
+                if (cleanedRow['Anak']) currentAnak = cleanedRow['Anak'];
+
+                const moyang = cleanedRow['Moyang'];
+                const pasanganMoyang = cleanedRow['Pasangan Moyang'];
+                const statusPasanganMoyang = cleanedRow['Status Pasangan Moyang'];
+                const buyut = cleanedRow['Buyut'];
+                const pasanganBuyut = cleanedRow['Pasangan Buyut'];
+                const statusPasanganBuyut = cleanedRow['Status Pasangan Buyut'];
+                const keturunanPertama = cleanedRow['Keturunan Pertama'];
+                const pasanganKeturunanPertama = cleanedRow['Pasangan Keturunan Pertama'];
+                const statusPasanganKeturunanPertama = cleanedRow['Status Pasangan Keturunan Pertama'];
+                const keturunanKedua = cleanedRow['Keturunan Kedua'];
+                const pasanganKeturunanKedua = cleanedRow['Pasangan Keturunan Kedua'];
+                const statusPasanganKeturunanKedua = cleanedRow['Status Pasangan Keturunan Kedua'];
+                const anak = cleanedRow['Anak'];
+                const pasanganAnak1 = cleanedRow['Pasangan Pertama Anak'];
+                const statusPasangan1 = cleanedRow['Status Pasangan Pertama Anak'];
+                const pasanganAnak2 = cleanedRow['Pasangan Kedua Anak'];
+                const statusPasangan2 = cleanedRow['Status Pasangan Kedua Anak'];
+                const cucu1 = cleanedRow['Cucu 1'];
+                const cucu2 = cleanedRow['Cucu 2'];
+                const cucu3 = cleanedRow['Cucu 3'];
+                const cucu4 = cleanedRow['Cucu 4'];
+
+                if (moyang) addPerson(moyang, null, moyang);
+                if (buyut) addPerson(buyut, currentMoyang, buyut);
+                if (keturunanPertama) addPerson(keturunanPertama, currentBuyut, keturunanPertama);
+                if (keturunanKedua) addPerson(keturunanKedua, currentKeturunanPertama, keturunanKedua);
+                if (anak) addPerson(anak, currentKeturunanKedua, anak);
+                if (cucu1) addPerson(cucu1, currentAnak, anak);
+                if (cucu2) addPerson(cucu2, currentAnak, anak);
+                if (cucu3) addPerson(cucu3, currentAnak, anak);
+                if (cucu4) addPerson(cucu4, currentAnak, anak);
+                
+                if (moyang && pasanganMoyang) addPartner(moyang, pasanganMoyang, statusPasanganMoyang);
+                if (buyut && pasanganBuyut) addPartner(buyut, pasanganBuyut, statusPasanganBuyut);
+                if (keturunanPertama && pasanganKeturunanPertama) addPartner(keturunanPertama, pasanganKeturunanPertama, statusPasanganKeturunanPertama);
+                if (keturunanKedua && pasanganKeturunanKedua) addPartner(keturunanKedua, pasanganKeturunanKedua, statusPasanganKeturunanKedua);
+                if (anak && pasanganAnak1) addPartner(anak, pasanganAnak1, statusPasangan1);
+                if (anak && pasanganAnak2) addPartner(anak, pasanganAnak2, statusPasangan2);
+            });
+            
+            flatData.push({ id: 'VIRTUAL_ROOT', parentId: null });
+            flatData.forEach(d => {
+                if (d.parentId === null && d.id !== 'VIRTUAL_ROOT') {
+                    d.parentId = 'VIRTUAL_ROOT';
+                }
+            });
+
+            const root = d3.stratify()
+                .id(d => d.id)
+                .parentId(d => d.parentId)
+                (flatData);
+
+            const treeLayout = d3.tree().nodeSize([nodeHeight + 25, minNodeWidth + 60]);
+            treeLayout(root);
+
+            currentNodesData = root.descendants().filter(d => d.id !== 'VIRTUAL_ROOT');
+            const linksToRender = root.links().filter(d => d.source.id !== 'VIRTUAL_ROOT');
+            
+            if (currentNodesData.length === 0) {
+                 g.append("text")
+                    .attr("x", svgWidth / 2)
+                    .attr("y", svgHeight / 2)
+                    .attr("text-anchor", "middle")
+                    .style("font-size", "16px")
+                    .text("Tidak ada data untuk filter yang dipilih.");
+                return;
+            }
+
+            g.append("g").selectAll("path").data(linksToRender).join("path")
+                .attr("class", "link")
+                .attr("d", d3.linkHorizontal().x(d => d.y).y(d => d.x))
+                .style("stroke", d => {
+                    const branchAncestor = branchAncestorMap.get(d.target.id);
+                    return branchAncestor ? colorScale(branchAncestor) : '#cbd5e1';
+                });
+
+            currentNodes = g.append("g").selectAll("g").data(currentNodesData).join("g")
+                .attr("class", "node").attr("transform", d => `translate(${d.y},${d.x})`);
+
+            const nameText = currentNodes.append("text").attr("class", "name").text(d => d.id);
+            const detailsText = currentNodes.append("text").attr("class", "details").text(d => {
+                const details = detailsMap.get(d.id);
+                if (details && details.pasangan && details.pasangan.length > 0) {
+                    const partnerText = details.pasangan.map(p => p.status ? `${p.name} (${p.status})` : p.name).join(', ');
+                    return `Pasangan: ${partnerText}`;
+                }
+                return "";
+            });
+
+            currentNodes.each(function(d) {
+                const gNode = d3.select(this);
+                const nameEl = gNode.select('.name');
+                const detailsEl = gNode.select('.details');
+                
+                const nameWidth = nameEl.node().getBBox().width;
+                const detailsWidth = detailsEl.node().getBBox().width;
+                const contentWidth = Math.max(nameWidth, detailsWidth);
+                const newWidth = Math.max(minNodeWidth, contentWidth + 40);
+
+                nameEl.attr("dy", (detailsEl.text() !== "") ? "-0.7em" : "0.3em");
+                detailsEl.attr("dy", "1.1em");
+                
+                gNode.insert("rect", "text")
+                    .attr("width", newWidth)
+                    .attr("height", nodeHeight)
+                    .attr("x", -newWidth / 2)
+                    .attr("y", -nodeHeight / 2)
+                    .attr("rx", 12).attr("ry", 12)
+                    .attr("fill", '#ffffff').attr("stroke", '#E7E7E7')
+                    .style('filter', 'url(#raised-shadow)');
+            });
+            
+            nameText.attr("text-anchor", "middle");
+            detailsText.attr("text-anchor", "middle");
+
+            currentNodes.on("mouseover", (event, d) => {
+                tooltip.style("opacity", 1);
+                const details = detailsMap.get(d.id);
+                const ayah = (d.parent && d.parent.id !== 'VIRTUAL_ROOT') ? d.parent.id : null;
+                
+                let tooltipContent = `<strong>${d.id}</strong><br>`;
+                if(ayah) tooltipContent += `Orang Tua: ${ayah}<br>`;
+                if(details && details.pasangan && details.pasangan.length > 0) {
+                    const partnerText = details.pasangan.map(p => p.status ? `${p.name} (${p.status})` : p.name).join(', ');
+                    tooltipContent += `Pasangan: ${partnerText}`;
+                }
+                
+                tooltip.html(tooltipContent);
+            }).on("mousemove", (event) => {
+                tooltip.style("left", (event.pageX + 15) + "px").style("top", (event.pageY - 28) + "px");
+            }).on("mouseout", () => tooltip.style("opacity", 0));
+
+            if (initialTargetName) {
+                const targetNodeData = currentNodesData.find(d => d.id === initialTargetName);
+                if (targetNodeData) {
+                    currentNodes.filter(d => d.id === targetNodeData.id)
+                        .select('rect')
+                        .style('filter', 'url(#strong-raised-shadow)');
+
+                    const x = targetNodeData.x;
+                    const y = targetNodeData.y;
+                    const newScale = 1.2;
+
+                    const initialTransform = d3.zoomIdentity
+                        .translate(svgWidth / 2, svgHeight / 2)
+                        .scale(newScale)
+                        .translate(-y, -x);
+                    
+                    svg.transition().duration(750).call(zoom.transform, initialTransform);
+                }
+            } else {
+                const bounds = g.node().getBBox();
+                if (bounds.width > 0 && bounds.height > 0) {
+                    const scale = Math.min(1, 0.9 / Math.max(bounds.width / svgWidth, bounds.height / svgHeight));
+                    const translateX = 100 - scale * bounds.x;
+                    const translateY = svgHeight / 2 - scale * (bounds.y + bounds.height / 2);
+                    const initialTransform = d3.zoomIdentity.translate(translateX, translateY).scale(scale);
+                    svg.transition().duration(750).call(zoom.transform, initialTransform);
+                }
+            }
+            
+            currentDetailsMap = detailsMap;
+            currentAllNames = Array.from(allNamesSet);
+        }
+
+        const searchFunction = (searchTerm) => {
+            const term = (searchTerm || document.getElementById('searchInput').value).trim().toLowerCase();
+            
+            if (lastHighlight) {
+                lastHighlight.element.text(lastHighlight.originalText);
+                if(lastHighlight.bg) lastHighlight.bg.remove();
+                lastHighlight = null;
+            }
+
+            if (!term) return;
+
+            currentNodes.selectAll('rect')
+                .style('filter', 'url(#raised-shadow)');
+
+            let targetNodeData = currentNodesData.find(d => d.id.toLowerCase().includes(term));
+            let isPartnerSearch = false;
+
+            if (!targetNodeData) {
+                for (const [personInTree, details] of currentDetailsMap.entries()) {
+                    if (details.pasangan && details.pasangan.some(p => p.name.toLowerCase().includes(term))) {
+                        targetNodeData = currentNodesData.find(d => d.id === personInTree);
+                        isPartnerSearch = true;
+                        break;
+                    }
+                }
+            }
+
+            if (targetNodeData) {
+                const targetNodeElement = currentNodes.filter(d => d.id === targetNodeData.id);
+                
+                targetNodeElement.select('rect')
+                    .style('filter', 'url(#strong-raised-shadow)');
+
+                const textElement = targetNodeElement.select(isPartnerSearch ? '.details' : '.name');
+                const originalText = textElement.text();
+                const matchIndex = originalText.toLowerCase().indexOf(term);
+                
+                if (matchIndex !== -1) {
+                    const matchText = originalText.substring(matchIndex, matchIndex + term.length);
+                    const beforeText = originalText.substring(0, matchIndex);
+                    const afterText = originalText.substring(matchIndex + term.length);
+
+                    textElement.text('');
+                    const beforeTspan = textElement.append('tspan').text(beforeText);
+                    const highlightTspan = textElement.append('tspan').attr('class', 'highlight').text(matchText);
+                    textElement.append('tspan').text(afterText);
+                    
+                    const totalWidth = textElement.node().getBBox().width;
+                    const beforeWidth = beforeTspan.node().getComputedTextLength();
+                    const highlightWidth = highlightTspan.node().getComputedTextLength();
+                    const textBBox = textElement.node().getBBox();
+
+                    const paddingX = 4;
+                    const paddingY = 2;
+                    
+                    const startX = -totalWidth / 2 + beforeWidth;
+
+                    const bgRect = targetNodeElement.insert('rect', 'text')
+                        .attr('x', startX - paddingX)
+                        .attr('y', textBBox.y - paddingY)
+                        .attr('width', highlightWidth + (paddingX * 2))
+                        .attr('height', textBBox.height + (paddingY * 2))
+                        .attr('fill', '#fef08a')
+                        .attr('rx', 4)
+                        .attr('ry', 4);
+
+                    lastHighlight = { element: textElement, originalText: originalText, bg: bgRect };
+                }
+
+                const x = targetNodeData.x;
+                const y = targetNodeData.y;
+                const newScale = 1.2;
+                
+                const transform = d3.zoomIdentity
+                    .translate(svgWidth / 2, svgHeight / 2)
+                    .scale(newScale)
+                    .translate(-y, -x);
+                
+                svg.transition().duration(750).call(zoom.transform, transform);
+            }
+        };
+
+        async function initialize() {
+            try {
+                const rawData = await d3.csv(dataUrl);
+                if (!rawData || rawData.length === 0) {
+                    throw new Error("Data CSV kosong atau gagal dimuat.");
+                }
+
+                let currentKeturunanPertama = '';
+                originalData = rawData.map(row => {
+                    const cleanedRow = {};
+                    for (const key in row) {
+                        cleanedRow[key.trim()] = row[key].trim();
+                    }
+                    if (cleanedRow['Keturunan Pertama']) {
+                        currentKeturunanPertama = cleanedRow['Keturunan Pertama'];
+                    }
+                    return { ...cleanedRow, ancestorKeturunanPertama: currentKeturunanPertama };
+                });
+
+                const keturunanPertamaList = [...new Set(originalData.map(row => row.ancestorKeturunanPertama).filter(Boolean))];
+                const dropdown = document.getElementById('filterDropdown');
+                const filterButton = document.getElementById('filterButton');
+                
+                const showAllItem = document.createElement('a');
+                showAllItem.href = '#';
+                showAllItem.textContent = 'Tampilkan Semua';
+                showAllItem.className = 'block px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md';
+                showAllItem.onclick = (e) => {
+                    e.preventDefault();
+                    renderTree(originalData);
+                    dropdown.classList.add('hidden');
+                    filterButton.classList.remove('active');
+                };
+                dropdown.appendChild(showAllItem);
+
+                const separator = document.createElement('hr');
+                separator.className = 'my-1';
+                dropdown.appendChild(separator);
+
+                keturunanPertamaList.forEach(kakek => {
+                    const item = document.createElement('a');
+                    item.href = '#';
+                    item.textContent = kakek;
+                    item.className = 'block px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md';
+                    item.onclick = (e) => {
+                        e.preventDefault();
+                        const filteredData = originalData.filter(row => row.ancestorKeturunanPertama === kakek);
+                        renderTree(filteredData, kakek);
+                        dropdown.classList.add('hidden');
+                        filterButton.classList.remove('active');
+                    };
+                    dropdown.appendChild(item);
+                });
+
+                filterButton.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    dropdown.classList.toggle('hidden');
+                    filterButton.classList.toggle('active');
+                });
+                
+                document.addEventListener('click', () => {
+                    dropdown.classList.add('hidden');
+                    filterButton.classList.remove('active');
+                });
+
+                renderTree(originalData, "Sopia");
+
+                const searchInput = document.getElementById('searchInput');
+                const suggestionsContainer = document.getElementById('suggestions');
+                
+                searchInput.addEventListener('input', () => {
+                    const query = searchInput.value.trim().toLowerCase();
+                    suggestionsContainer.innerHTML = '';
+
+                    if (query.length === 0) {
+                        suggestionsContainer.classList.add('hidden');
+                        return;
+                    }
+
+                    const filteredNames = currentAllNames.filter(name => name.toLowerCase().includes(query)).slice(0, 5);
+
+                    if (filteredNames.length > 0) {
+                        filteredNames.forEach(name => {
+                            const item = document.createElement('a');
+                            item.href = '#';
+                            
+                            const details = currentDetailsMap.get(name);
+                            let suggestionText = name;
+                            if (details && details.pasangan && details.pasangan.length > 0) {
+                                const partnerText = details.pasangan.map(p => p.status ? `${p.name} (${p.status})` : p.name).join(', ');
+                                suggestionText = `${name} (${partnerText})`;
+                            }
+
+                            item.textContent = suggestionText;
+                            item.className = 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100';
+                            item.onclick = (e) => {
+                                e.preventDefault();
+                                searchInput.value = name;
+                                suggestionsContainer.classList.add('hidden');
+                                searchFunction(name);
+                            };
+                            suggestionsContainer.appendChild(item);
+                        });
+                    } else {
+                        const noResult = document.createElement('div');
+                        noResult.textContent = 'Data tidak ditemukan';
+                        noResult.className = 'px-4 py-2 text-sm text-gray-500';
+                        suggestionsContainer.appendChild(noResult);
+                    }
+                    suggestionsContainer.classList.remove('hidden');
+                });
+
+                document.getElementById('searchButton').addEventListener('click', () => {
+                    suggestionsContainer.classList.add('hidden');
+                    searchFunction();
+                });
+                searchInput.addEventListener('keypress', (event) => {
+                    if (event.key === 'Enter') {
+                        suggestionsContainer.classList.add('hidden');
+                        searchFunction();
+                    }
+                });
+
+            } catch (error) {
+                console.error("Gagal memuat atau menggambar data:", error);
+                container.html(`<div class="w-full h-full flex items-center justify-center text-red-500 p-8 text-center">
+                    <p>Gagal memuat data silsilah.<br>${error.message}</p>
+                </div>`);
+            }
+        }
+
+        initialize();
+    </script>
+</body>
+</html>
