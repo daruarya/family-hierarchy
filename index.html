@@ -13,18 +13,17 @@
             overflow: hidden;
         }
         .node rect {
-            stroke-width: 0.5px;
-            stroke: #E7E7E7;
-            transition: filter 0.3s ease-in-out;
+            stroke-width: 0.5px; /* Ketebalan garis kartu diubah */
+            transition: filter 0.3s ease-in-out; /* Transisi untuk efek shadow */
         }
         .node .name {
             font-weight: 600;
             font-size: 14px;
-            fill: #111827;
+            fill: #111827; /* gray-900 */
         }
         .node .details {
             font-size: 12px;
-            fill: #4b5563;
+            fill: #4b5563; /* gray-600 */
         }
         .link {
             fill: none;
@@ -38,27 +37,21 @@
             font-size: 12px;
             background: #ffffff;
             color: #1f2937;
-            border: 0.5px solid #E7E7E7;
+            border: 1px solid #e5e7eb;
             border-radius: 8px;
             pointer-events: none;
             opacity: 0;
             transition: opacity 0.2s;
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
         }
+        /* Style untuk tspan yang disorot, sekarang hanya untuk menebalkan teks */
         .highlight {
             font-weight: 700;
         }
+        /* *** BARU: Style untuk tombol filter aktif *** */
         #filterButton.active {
+            background-color: #f3f4f6; /* gray-100 */
             box-shadow: inset 2px 2px 4px #d1d9e6, inset -2px -2px 4px #ffffff;
-        }
-        #filterButton .icon-filled { display: none; }
-        #filterButton.active .icon-outline { display: none; }
-        #filterButton.active .icon-filled { display: inline-block; }
-
-        /* Kelas baru untuk border yang disederhanakan */
-        .popover-border {
-            border-color: #E7E7E7;
-            border-width: 0.5px;
         }
     </style>
 </head>
@@ -67,34 +60,32 @@
     <!-- TOP BAR -->
     <header class="fixed top-0 left-0 right-0 z-20 bg-white/80 backdrop-blur-sm border-b border-gray-200 shadow-sm">
         <div class="mx-auto px-6 py-3 flex justify-between items-center">
+            <!-- Judul di Kiri -->
             <div>
-                <h1 class="text-xl font-bold text-gray-900">Hallo Family 👋</h1>
+                <h1 class="text-xl font-bold text-gray-900">Hallo 👋</h1>
             </div>
+            <!-- Kontrol di Kanan -->
             <div class="flex items-center space-x-2">
+                <!-- *** FILTER *** -->
                 <div class="relative">
-                    <button id="filterButton" class="bg-white hover:bg-gray-100 border rounded-lg w-10 h-10 text-gray-500 shadow-sm flex items-center justify-center transition-all popover-border">
-                        <span class="icon-outline">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.572a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z" />
-                            </svg>
-                        </span>
-                        <span class="icon-filled">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
-                              <path fill-rule="evenodd" d="M3.792 2.938A49.069 49.069 0 0112 2.25c2.797 0 5.54.236 8.209.688a1.857 1.857 0 011.541 1.836v1.044a3 3 0 01-.879 2.121l-6.182 6.182a1.5 1.5 0 00-.439 1.061v2.927a3 3 0 01-1.658 2.684l-1.757.878A.75.75 0 019.75 21v-5.757a1.5 1.5 0 00-.439-1.061L3.121 7.938a3 3 0 01-.879-2.121V4.774c0-.796.506-1.498 1.27-1.774z" clip-rule="evenodd" />
-                            </svg>
-                        </span>
+                    <button id="filterButton" class="bg-white hover:bg-gray-100 border rounded-lg w-10 h-10 text-gray-500 shadow-sm flex items-center justify-center transition-all" style="border-color: #E7E7E7; border-width: 0.5px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.572a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z" />
+                        </svg>
                     </button>
-                    <div id="filterDropdown" class="absolute right-0 mt-2 w-56 bg-white border rounded-lg shadow-lg z-30 hidden p-2 space-y-1 popover-border">
+                    <div id="filterDropdown" class="absolute right-0 mt-2 w-56 bg-white border border-gray-300 rounded-lg shadow-lg z-30 hidden p-2 space-y-1">
+                        <!-- Opsi filter akan diisi oleh JavaScript -->
                     </div>
                 </div>
+                <!-- Pencarian -->
                 <div class="relative">
-                    <input type="text" id="searchInput" placeholder="Search Name..." class="w-full h-10 bg-white text-gray-900 border rounded-lg pl-3 pr-10 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none shadow-sm popover-border">
+                    <input type="text" id="searchInput" placeholder="Search Name..." class="w-full h-10 bg-white text-gray-900 border rounded-lg pl-3 pr-10 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none shadow-sm" style="border-color: #E7E7E7; border-width: 0.5px;">
                     <button id="searchButton" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
                             <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
                         </svg>
                     </button>
-                    <div id="suggestions" class="absolute mt-1 w-full bg-white border rounded-lg shadow-lg z-30 hidden popover-border"></div>
+                    <div id="suggestions" class="absolute mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg z-30 hidden"></div>
                 </div>
             </div>
         </div>
@@ -137,12 +128,16 @@
         let originalData = [];
         let currentNodes, currentNodesData, currentDetailsMap, currentAllNames;
 
-        function processData(dataToProcess) {
+        // Fungsi utama untuk menggambar pohon
+        function renderTree(dataToRender, initialTargetName = null) {
+            g.selectAll("*").remove();
+
             const flatData = [];
             const addedPeople = new Set();
             const detailsMap = new Map();
             const branchAncestorMap = new Map();
-            const allNamesSet = new Set();
+            const colorScale = d3.scaleOrdinal(d3.schemeSet2);
+            const allNamesSet = new Set(); 
 
             const addPerson = (name, parentName, branchAncestor) => {
                 if (name && !addedPeople.has(name)) {
@@ -156,57 +151,94 @@
                 if (person && partner) {
                     const partnerObj = { name: partner, status: status };
                     const personObj = { name: person, status: null };
+
                     const personDetails = detailsMap.get(person) || {};
                     if (!personDetails.pasangan) personDetails.pasangan = [];
-                    if (!personDetails.pasangan.find(p => p.name === partner)) personDetails.pasangan.push(partnerObj);
+                    if (!personDetails.pasangan.find(p => p.name === partner)) {
+                        personDetails.pasangan.push(partnerObj);
+                    }
                     detailsMap.set(person, personDetails);
+
                     const partnerDetails = detailsMap.get(partner) || {};
-                    if (!partnerDetails.pasangan) partnerDetails.pasangan = [];
-                    if (!partnerDetails.pasangan.find(p => p.name === person)) partnerDetails.pasangan.push(personObj);
+                     if (!partnerDetails.pasangan) partnerDetails.pasangan = [];
+                    if (!partnerDetails.pasangan.find(p => p.name === person)) {
+                        partnerDetails.pasangan.push(personObj);
+                    }
                     detailsMap.set(partner, partnerDetails);
                 }
             };
 
-            let currentMoyang = '', currentBuyut = '', currentKeturunanPertama = '', currentKeturunanKedua = '', currentAnak = '';
+            let currentMoyang = '';
+            let currentBuyut = '';
+            let currentKeturunanPertama = '';
+            let currentKeturunanKedua = '';
+            let currentAnak = '';
 
-            dataToProcess.forEach(row => {
-                Object.values(row).forEach(name => { if (name) allNamesSet.add(name); });
-                if (row['Moyang']) currentMoyang = row['Moyang'];
-                if (row['Buyut']) currentBuyut = row['Buyut'];
-                if (row['Keturunan Pertama']) currentKeturunanPertama = row['Keturunan Pertama'];
-                if (row['Keturunan Kedua']) currentKeturunanKedua = row['Keturunan Kedua'];
-                if (row['Anak']) currentAnak = row['Anak'];
+            dataToRender.forEach(row => {
+                const cleanedRow = row;
 
-                addPerson(row['Moyang'], null, row['Moyang']);
-                addPerson(row['Buyut'], currentMoyang, row['Buyut']);
-                addPerson(row['Keturunan Pertama'], currentBuyut, row['Keturunan Pertama']);
-                addPerson(row['Keturunan Kedua'], currentKeturunanPertama, row['Keturunan Kedua']);
-                addPerson(row['Anak'], currentKeturunanKedua, row['Anak']);
-                addPerson(row['Cucu 1'], currentAnak, row['Anak']);
-                addPerson(row['Cucu 2'], currentAnak, row['Anak']);
-                addPerson(row['Cucu 3'], currentAnak, row['Anak']);
-                addPerson(row['Cucu 4'], currentAnak, row['Anak']);
+                Object.values(cleanedRow).forEach(name => {
+                    if (name) allNamesSet.add(name);
+                });
+
+                if (cleanedRow['Moyang']) currentMoyang = cleanedRow['Moyang'];
+                if (cleanedRow['Buyut']) currentBuyut = cleanedRow['Buyut'];
+                if (cleanedRow['Keturunan Pertama']) currentKeturunanPertama = cleanedRow['Keturunan Pertama'];
+                if (cleanedRow['Keturunan Kedua']) currentKeturunanKedua = cleanedRow['Keturunan Kedua'];
+                if (cleanedRow['Anak']) currentAnak = cleanedRow['Anak'];
+
+                const moyang = cleanedRow['Moyang'];
+                const pasanganMoyang = cleanedRow['Pasangan Moyang'];
+                const statusPasanganMoyang = cleanedRow['Status Pasangan Moyang'];
+                const buyut = cleanedRow['Buyut'];
+                const pasanganBuyut = cleanedRow['Pasangan Buyut'];
+                const statusPasanganBuyut = cleanedRow['Status Pasangan Buyut'];
+                const keturunanPertama = cleanedRow['Keturunan Pertama'];
+                const pasanganKeturunanPertama = cleanedRow['Pasangan Keturunan Pertama'];
+                const statusPasanganKeturunanPertama = cleanedRow['Status Pasangan Keturunan Pertama'];
+                const keturunanKedua = cleanedRow['Keturunan Kedua'];
+                const pasanganKeturunanKedua = cleanedRow['Pasangan Keturunan Kedua'];
+                const statusPasanganKeturunanKedua = cleanedRow['Status Pasangan Keturunan Kedua'];
+                const anak = cleanedRow['Anak'];
+                const pasanganAnak1 = cleanedRow['Pasangan Pertama Anak'];
+                const statusPasangan1 = cleanedRow['Status Pasangan Pertama Anak'];
+                const pasanganAnak2 = cleanedRow['Pasangan Kedua Anak'];
+                const statusPasangan2 = cleanedRow['Status Pasangan Kedua Anak'];
+                const cucu1 = cleanedRow['Cucu 1'];
+                const cucu2 = cleanedRow['Cucu 2'];
+                const cucu3 = cleanedRow['Cucu 3'];
+                const cucu4 = cleanedRow['Cucu 4'];
+
+                if (moyang) addPerson(moyang, null, moyang);
+                if (buyut) addPerson(buyut, currentMoyang, buyut);
+                if (keturunanPertama) addPerson(keturunanPertama, currentBuyut, keturunanPertama);
+                if (keturunanKedua) addPerson(keturunanKedua, currentKeturunanPertama, keturunanKedua);
+                if (anak) addPerson(anak, currentKeturunanKedua, anak);
+                if (cucu1) addPerson(cucu1, currentAnak, anak);
+                if (cucu2) addPerson(cucu2, currentAnak, anak);
+                if (cucu3) addPerson(cucu3, currentAnak, anak);
+                if (cucu4) addPerson(cucu4, currentAnak, anak);
                 
-                addPartner(row['Keturunan Pertama'], row['Pasangan Keturunan Pertama'], row['Status Pasangan Keturunan Pertama']);
-                addPartner(row['Keturunan Kedua'], row['Pasangan Keturunan Kedua'], row['Status Pasangan Keturunan Kedua']);
-                addPartner(row['Anak'], row['Pasangan Pertama Anak'], row['Status Pasangan Pertama Anak']);
-                addPartner(row['Anak'], row['Pasangan Kedua Anak'], row['Status Pasangan Kedua Anak']);
+                if (moyang && pasanganMoyang) addPartner(moyang, pasanganMoyang, statusPasanganMoyang);
+                if (buyut && pasanganBuyut) addPartner(buyut, pasanganBuyut, statusPasanganBuyut);
+                if (keturunanPertama && pasanganKeturunanPertama) addPartner(keturunanPertama, pasanganKeturunanPertama, statusPasanganKeturunanPertama);
+                if (keturunanKedua && pasanganKeturunanKedua) addPartner(keturunanKedua, pasanganKeturunanKedua, statusPasanganKeturunanKedua);
+                if (anak && pasanganAnak1) addPartner(anak, pasanganAnak1, statusPasangan1);
+                if (anak && pasanganAnak2) addPartner(anak, pasanganAnak2, statusPasangan2);
             });
             
             flatData.push({ id: 'VIRTUAL_ROOT', parentId: null });
             flatData.forEach(d => {
-                if (d.parentId === null && d.id !== 'VIRTUAL_ROOT') d.parentId = 'VIRTUAL_ROOT';
+                if (d.parentId === null && d.id !== 'VIRTUAL_ROOT') {
+                    d.parentId = 'VIRTUAL_ROOT';
+                }
             });
-            
-            return { flatData, detailsMap, branchAncestorMap, allNamesSet };
-        }
 
-        function renderTree(processedData, initialTargetName = null) {
-            g.selectAll("*").remove();
-            const { flatData, detailsMap, branchAncestorMap, allNamesSet } = processedData;
-            const colorScale = d3.scaleOrdinal(d3.schemeSet2);
+            const root = d3.stratify()
+                .id(d => d.id)
+                .parentId(d => d.parentId)
+                (flatData);
 
-            const root = d3.stratify().id(d => d.id).parentId(d => d.parentId)(flatData);
             const treeLayout = d3.tree().nodeSize([nodeHeight + 25, minNodeWidth + 60]);
             treeLayout(root);
 
@@ -214,15 +246,21 @@
             const linksToRender = root.links().filter(d => d.source.id !== 'VIRTUAL_ROOT');
             
             if (currentNodesData.length === 0) {
-                 g.append("text").attr("x", svgWidth / 2).attr("y", svgHeight / 2).attr("text-anchor", "middle").style("font-size", "16px").text("Tidak ada data untuk filter yang dipilih.");
+                 g.append("text")
+                    .attr("x", svgWidth / 2)
+                    .attr("y", svgHeight / 2)
+                    .attr("text-anchor", "middle")
+                    .style("font-size", "16px")
+                    .text("Tidak ada data untuk filter yang dipilih.");
                 return;
             }
 
             g.append("g").selectAll("path").data(linksToRender).join("path")
-                .attr("class", "link").attr("d", d3.linkHorizontal().x(d => d.y).y(d => d.x))
+                .attr("class", "link")
+                .attr("d", d3.linkHorizontal().x(d => d.y).y(d => d.x))
                 .style("stroke", d => {
-                    const ancestor = branchAncestorMap.get(d.target.id);
-                    return ancestor ? colorScale(ancestor) : '#cbd5e1';
+                    const branchAncestor = branchAncestorMap.get(d.target.id);
+                    return branchAncestor ? colorScale(branchAncestor) : '#cbd5e1';
                 });
 
             currentNodes = g.append("g").selectAll("g").data(currentNodesData).join("g")
@@ -242,13 +280,23 @@
                 const gNode = d3.select(this);
                 const nameEl = gNode.select('.name');
                 const detailsEl = gNode.select('.details');
+                
                 const nameWidth = nameEl.node().getBBox().width;
                 const detailsWidth = detailsEl.node().getBBox().width;
                 const contentWidth = Math.max(nameWidth, detailsWidth);
                 const newWidth = Math.max(minNodeWidth, contentWidth + 40);
+
                 nameEl.attr("dy", (detailsEl.text() !== "") ? "-0.7em" : "0.3em");
                 detailsEl.attr("dy", "1.1em");
-                gNode.insert("rect", "text").attr("width", newWidth).attr("height", nodeHeight).attr("x", -newWidth / 2).attr("y", -nodeHeight / 2).attr("rx", 12).attr("ry", 12).attr("fill", '#ffffff').attr("stroke", '#E7E7E7').style('filter', 'url(#raised-shadow)');
+                
+                gNode.insert("rect", "text")
+                    .attr("width", newWidth)
+                    .attr("height", nodeHeight)
+                    .attr("x", -newWidth / 2)
+                    .attr("y", -nodeHeight / 2)
+                    .attr("rx", 12).attr("ry", 12)
+                    .attr("fill", '#ffffff').attr("stroke", '#E7E7E7')
+                    .style('filter', 'url(#raised-shadow)');
             });
             
             nameText.attr("text-anchor", "middle");
@@ -257,26 +305,38 @@
             currentNodes.on("mouseover", (event, d) => {
                 tooltip.style("opacity", 1);
                 const details = detailsMap.get(d.id);
-                const parent = (d.parent && d.parent.id !== 'VIRTUAL_ROOT') ? d.parent.id : null;
+                const ayah = (d.parent && d.parent.id !== 'VIRTUAL_ROOT') ? d.parent.id : null;
+                
                 let tooltipContent = `<strong>${d.id}</strong><br>`;
-                if(parent) tooltipContent += `Orang Tua: ${parent}<br>`;
+                if(ayah) tooltipContent += `Orang Tua: ${ayah}<br>`;
                 if(details && details.pasangan && details.pasangan.length > 0) {
                     const partnerText = details.pasangan.map(p => p.status ? `${p.name} (${p.status})` : p.name).join(', ');
                     tooltipContent += `Pasangan: ${partnerText}`;
                 }
+                
                 tooltip.html(tooltipContent);
             }).on("mousemove", (event) => {
                 tooltip.style("left", (event.pageX + 15) + "px").style("top", (event.pageY - 28) + "px");
             }).on("mouseout", () => tooltip.style("opacity", 0));
 
-            const targetNodeData = currentNodesData.find(d => d.id === initialTargetName);
-            if (initialTargetName && targetNodeData) {
-                currentNodes.filter(d => d.id === targetNodeData.id).select('rect').style('filter', 'url(#strong-raised-shadow)');
-                const x = targetNodeData.x;
-                const y = targetNodeData.y;
-                const newScale = 1.2;
-                const initialTransform = d3.zoomIdentity.translate(svgWidth / 2, svgHeight / 2).scale(newScale).translate(-y, -x);
-                svg.transition().duration(750).call(zoom.transform, initialTransform);
+            if (initialTargetName) {
+                const targetNodeData = currentNodesData.find(d => d.id === initialTargetName);
+                if (targetNodeData) {
+                    currentNodes.filter(d => d.id === targetNodeData.id)
+                        .select('rect')
+                        .style('filter', 'url(#strong-raised-shadow)');
+
+                    const x = targetNodeData.x;
+                    const y = targetNodeData.y;
+                    const newScale = 1.2;
+
+                    const initialTransform = d3.zoomIdentity
+                        .translate(svgWidth / 2, svgHeight / 2)
+                        .scale(newScale)
+                        .translate(-y, -x);
+                    
+                    svg.transition().duration(750).call(zoom.transform, initialTransform);
+                }
             } else {
                 const bounds = g.node().getBBox();
                 if (bounds.width > 0 && bounds.height > 0) {
@@ -292,16 +352,20 @@
             currentAllNames = Array.from(allNamesSet);
         }
 
-        function searchFunction(searchTerm) {
+        const searchFunction = (searchTerm) => {
             const term = (searchTerm || document.getElementById('searchInput').value).trim().toLowerCase();
+            
             if (lastHighlight) {
                 lastHighlight.element.text(lastHighlight.originalText);
                 if(lastHighlight.bg) lastHighlight.bg.remove();
                 lastHighlight = null;
             }
+
             if (!term) return;
 
-            currentNodes.selectAll('rect').style('filter', 'url(#raised-shadow)');
+            currentNodes.selectAll('rect')
+                .style('filter', 'url(#raised-shadow)');
+
             let targetNodeData = currentNodesData.find(d => d.id.toLowerCase().includes(term));
             let isPartnerSearch = false;
 
@@ -317,7 +381,10 @@
 
             if (targetNodeData) {
                 const targetNodeElement = currentNodes.filter(d => d.id === targetNodeData.id);
-                targetNodeElement.select('rect').style('filter', 'url(#strong-raised-shadow)');
+                
+                targetNodeElement.select('rect')
+                    .style('filter', 'url(#strong-raised-shadow)');
+
                 const textElement = targetNodeElement.select(isPartnerSearch ? '.details' : '.name');
                 const originalText = textElement.text();
                 const matchIndex = originalText.toLowerCase().indexOf(term);
@@ -326,46 +393,63 @@
                     const matchText = originalText.substring(matchIndex, matchIndex + term.length);
                     const beforeText = originalText.substring(0, matchIndex);
                     const afterText = originalText.substring(matchIndex + term.length);
+
                     textElement.text('');
                     const beforeTspan = textElement.append('tspan').text(beforeText);
                     const highlightTspan = textElement.append('tspan').attr('class', 'highlight').text(matchText);
                     textElement.append('tspan').text(afterText);
+                    
                     const totalWidth = textElement.node().getBBox().width;
                     const beforeWidth = beforeTspan.node().getComputedTextLength();
                     const highlightWidth = highlightTspan.node().getComputedTextLength();
                     const textBBox = textElement.node().getBBox();
-                    const paddingX = 4, paddingY = 2;
+
+                    const paddingX = 4;
+                    const paddingY = 2;
+                    
                     const startX = -totalWidth / 2 + beforeWidth;
-                    const bgRect = targetNodeElement.insert('rect', 'text').attr('x', startX - paddingX).attr('y', textBBox.y - paddingY).attr('width', highlightWidth + (paddingX * 2)).attr('height', textBBox.height + (paddingY * 2)).attr('fill', '#fef08a').attr('rx', 4).attr('ry', 4);
+
+                    const bgRect = targetNodeElement.insert('rect', 'text')
+                        .attr('x', startX - paddingX)
+                        .attr('y', textBBox.y - paddingY)
+                        .attr('width', highlightWidth + (paddingX * 2))
+                        .attr('height', textBBox.height + (paddingY * 2))
+                        .attr('fill', '#fef08a')
+                        .attr('rx', 4)
+                        .attr('ry', 4);
+
                     lastHighlight = { element: textElement, originalText: originalText, bg: bgRect };
                 }
 
-                const x = targetNodeData.x, y = targetNodeData.y;
-                const transform = d3.zoomIdentity.translate(svgWidth / 2, svgHeight / 2).scale(1.2).translate(-y, -x);
+                const x = targetNodeData.x;
+                const y = targetNodeData.y;
+                const newScale = 1.2;
+                
+                const transform = d3.zoomIdentity
+                    .translate(svgWidth / 2, svgHeight / 2)
+                    .scale(newScale)
+                    .translate(-y, -x);
+                
                 svg.transition().duration(750).call(zoom.transform, transform);
             }
-        }
-
-        function applyFilter() {
-            const selectedKakek = document.querySelector('#filterDropdown a.active')?.dataset.value;
-            if (!selectedKakek || selectedKakek === 'all') {
-                renderTree(processData(originalData));
-            } else {
-                const filteredData = originalData.filter(row => row.ancestorKeturunanPertama === selectedKakek);
-                renderTree(processData(filteredData), selectedKakek);
-            }
-        }
+        };
 
         async function initialize() {
             try {
                 const rawData = await d3.csv(dataUrl);
-                if (!rawData || rawData.length === 0) throw new Error("Data CSV kosong atau gagal dimuat.");
+                if (!rawData || rawData.length === 0) {
+                    throw new Error("Data CSV kosong atau gagal dimuat.");
+                }
 
                 let currentKeturunanPertama = '';
                 originalData = rawData.map(row => {
                     const cleanedRow = {};
-                    for (const key in row) cleanedRow[key.trim()] = row[key].trim();
-                    if (cleanedRow['Keturunan Pertama']) currentKeturunanPertama = cleanedRow['Keturunan Pertama'];
+                    for (const key in row) {
+                        cleanedRow[key.trim()] = row[key].trim();
+                    }
+                    if (cleanedRow['Keturunan Pertama']) {
+                        currentKeturunanPertama = cleanedRow['Keturunan Pertama'];
+                    }
                     return { ...cleanedRow, ancestorKeturunanPertama: currentKeturunanPertama };
                 });
 
@@ -379,12 +463,15 @@
                 showAllItem.className = 'block px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md';
                 showAllItem.onclick = (e) => {
                     e.preventDefault();
-                    renderTree(processData(originalData));
+                    renderTree(originalData);
                     dropdown.classList.add('hidden');
                     filterButton.classList.remove('active');
                 };
                 dropdown.appendChild(showAllItem);
-                dropdown.appendChild(document.createElement('hr')).className = 'my-1';
+
+                const separator = document.createElement('hr');
+                separator.className = 'my-1';
+                dropdown.appendChild(separator);
 
                 keturunanPertamaList.forEach(kakek => {
                     const item = document.createElement('a');
@@ -394,7 +481,7 @@
                     item.onclick = (e) => {
                         e.preventDefault();
                         const filteredData = originalData.filter(row => row.ancestorKeturunanPertama === kakek);
-                        renderTree(processData(filteredData), kakek);
+                        renderTree(filteredData, kakek);
                         dropdown.classList.add('hidden');
                         filterButton.classList.remove('active');
                     };
@@ -412,7 +499,7 @@
                     filterButton.classList.remove('active');
                 });
 
-                renderTree(processData(originalData), "Sopia");
+                renderTree(originalData, "Sopia");
 
                 const searchInput = document.getElementById('searchInput');
                 const suggestionsContainer = document.getElementById('suggestions');
@@ -420,21 +507,26 @@
                 searchInput.addEventListener('input', () => {
                     const query = searchInput.value.trim().toLowerCase();
                     suggestionsContainer.innerHTML = '';
+
                     if (query.length === 0) {
                         suggestionsContainer.classList.add('hidden');
                         return;
                     }
+
                     const filteredNames = currentAllNames.filter(name => name.toLowerCase().includes(query)).slice(0, 5);
+
                     if (filteredNames.length > 0) {
                         filteredNames.forEach(name => {
                             const item = document.createElement('a');
                             item.href = '#';
+                            
                             const details = currentDetailsMap.get(name);
                             let suggestionText = name;
                             if (details && details.pasangan && details.pasangan.length > 0) {
                                 const partnerText = details.pasangan.map(p => p.status ? `${p.name} (${p.status})` : p.name).join(', ');
                                 suggestionText = `${name} (${partnerText})`;
                             }
+
                             item.textContent = suggestionText;
                             item.className = 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100';
                             item.onclick = (e) => {
